@@ -116,8 +116,7 @@ Random forest With Principal component (Rmarkdown):
 Following the Principal Component Analysis in RMarkdown, the Random Forest algorithm is used to train the model. The test set is used to predict life expectancy, the above image depicts the model's output. The mean squared error is 11.32, and the R squared value is 86.98. This means that the trained model predicts life expectancy with an 86.98 percent accuracy. It also provides the number of trees, which is 1000, as well as the number of variables tried at each step, which is 2.
 Based on model performance, we can see that our model produces nearly identical results with the principal component and with the actual dataset feature. when there is only a minor difference between both outputs (R and PySpark).
 
-Comparison of methods
-Student ID	ML algorithm used	Result
+Comparison of methods	ML algorithm used	Result
 
 
 Decision Tree	R2 – 0.99
@@ -125,7 +124,7 @@ MSE – 0.376
 RMSE – 0.613
 
 
-	R2 – 1.0
+Multiple linear regression R2 – 1.0
 MSE – 2.43
 RMSE- 1.56
 
