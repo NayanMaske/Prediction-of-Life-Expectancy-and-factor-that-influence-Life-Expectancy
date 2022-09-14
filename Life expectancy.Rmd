@@ -1,0 +1,1080 @@
+---
+title: "DDA Coursework"
+author: 
+date: "3/5/2022"
+output: 
+editor_options:
+    pdf_document: default
+ df_print: paged
+ chunk_output_type:console
+---
+
+```{r include= FALSE}
+knitr::opts_chunk$set(comment = '>')
+```
+
+********************Table of contents****************
+1.Load packages and library
+2.Load dataframe
+3.inspect dataframe
+4.Detecting missing values 
+5.Imputing missing values  
+6.outlier detection
+7.removing Outliers(using winsorising technique )
+8.finding Correlation
+9.unsupervised Method(PCA)
+10.Random forest
+
+
+1.Load packages and library
+```{r}
+#***Loading necessary packages for the Analysis***
+install.packages("psych")
+install.packages("PerformanceAnalytics")
+install.packages("ggstatsplot")
+install.packages("lessR")
+install.packages("ggally")
+install.packages("corrplot")
+install.packages("ggstatsplot")
+install.packages("Rtools")
+install.packages("devtools")
+install.packages("factoextra")
+install.packages("caret")
+install.packages("e1071")
+install.packages("caTools")
+install.packages("randomForest")
+install.packages("caTools")
+install.packages("tidyr")
+install.packages("corrr")
+install.packages("correlation")
+install.packages("tidyverse")
+install.packages("pacman")
+install.packages("gapminder")
+
+library(caTools)
+library(ggplot2) 
+library(pacman)
+library(PerformanceAnalytics)
+library(gapminder)
+library(tidyr)
+library(tidyverse)
+library(GGally)
+library(lessR)
+library(corrplot)
+library(correlation)
+library(corrr)
+library(ggstatsplot)
+library(devtools)
+library(factoextra)
+library(caret)
+library(e1071)
+library(randomForest)
+library(ggplot2)
+library(ggcorrplot)
+library(psych)
+
+```
+
+
+```{r}
+```
+
+2.Loading dataframe 
+3.inspect dataframe
+
+```{r}
+Life <- read.csv("Life Expectancy Data.csv",stringsAsFactors = TRUE)
+
+#***Inspect the Data*******
+str(Life)
+```
+Observation
+
+21 independent features
+2938 entries/ samples
+Alcohol,Hepatitis B, BMI, Polio, Total expenditure, Diphtheria,GDP,Population,thinness 1-19 years, thinness 5-9 years, Income composition of resources, Schooling, has missing values
+There are Categorical & Numerical feature.
+dependent feature is 'Life expectancy'
+
+To begin with, we first performed some data cleaning and exploration. The exploration was very necessary for us to have a deeper understanding of the dataset before the process of gaining insights from it.
+
+
+4.Detecting missing values 
+
+```{r}
+summary(Life)
+```
+
+```{r}
+#4 ******Checking NA values of Each column in Data frame*******
+word<-("---------- Number of Na value in each variable--------------------------")
+print(word)
+sum(is.na(Life))
+Life_NA <- apply(is.na(Life), 2 , sum)
+Life_NA
+```
+
+```{r}
+
+
+
+#2.2  *********calculating the percentage of NA per variable********
+word<-("---------- Percentage of Na value--------------------------")
+print(word)
+LifeNA_perc <- Life_NA / dim(Life)[1] * 100
+LifeNA_perc
+```
+
+
+5. ******* Imputing missing values  ************
+
+```{r}
+word<-("--------------Imputing missing values---------  ")
+print(word)
+LifeExpentancy <-Life$Life.expectancy
+hist(LifeExpentancy)
+#*****Calculating median of Life expectancy removing NA values*********
+medlife <-median(Life$Life.expectancy, na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+Life[is.na( Life$Life.expectancy),"Life.expectancy"] <- medlife
+
+```
+
+```{r}
+#*****Histogram*********
+Adult_Mortality <-Life$Adult.Mortality
+hist(Adult_Mortality)
+
+
+#Histogram is Left skewed ,so we replace missing value of Adult.Mortality with Median.
+# first calculate median of Adult.Mortality removing missing values
+medadult <-median(Life$Adult.Mortality, na.rm=TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Adult.Mortality),"Adult.Mortality"] <-medadult
+
+```
+
+```{r}
+#*****Histogram*********
+Alcohol <-Life$Alcohol
+hist(Alcohol)
+
+#Histogram is Left skewed ,so we replace missing value of Alcohol with Median.
+# first calculate median of Alcohol removing missing values
+medalcohol <-median(Life$Alcohol,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Alcohol) ,"Alcohol"] <-medalcohol
+```
+
+```{r}
+hepatitisB <-Life$Hepatitis.B
+hist(hepatitisB)
+
+#Histogram is right side skewed ,so we replace missing value of Hepatitis B with Median.
+# first calculate median of Hepatitis B removing missing values
+medHepatitis <-median(Life$Hepatitis.B,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Hepatitis.B),"Hepatitis.B"]<-medHepatitis
+```
+
+```{r}
+BMI<- Life$BMI
+hist(BMI)
+
+#Histogram is Asymmetric ,so we replace missing value of BMI with Median.
+# first calculate median of BMI removing missing values
+medBMI <-median(Life$BMI,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$BMI),"BMI"]<-medBMI
+```
+
+```{r}
+polio<- Life$Polio
+hist(polio)
+
+#Histogram is right side skewed ,so we replace missing value of polio with Median.
+# first calculate median of polio removing missing values
+medpolio <-median(Life$Polio,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Polio),"Polio"]<-medpolio
+```
+
+```{r}
+#Life$polio <- NULL
+
+Total_Expenditure <-Life$Total.expenditure
+hist(Total_Expenditure)
+
+# first calculate median of Total Expenditure removing missing values
+medtotalExp <-median(Life$Total.expenditure,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Total.expenditure),"Total.expenditure"]<-medtotalExp
+```
+
+```{r}
+Diphtheria <-Life$Diphtheria
+hist(Diphtheria)
+
+#Histogram is right side skewed,so we replace missing value of Diphtheria with Median
+#first calculate median of Diphtheria removing missing values
+medDiphtheria <-median(Life$Diphtheria,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Diphtheria),"Diphtheria"]<-medDiphtheria
+```
+
+```{r}
+GDP <-Life$GDP
+hist(GDP)
+
+#Histogram is Left side skewed,so we replace missing value of GDP with Median
+#first calculate median of GDP removing missing values
+medGDP <-median(Life$GDP,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$GDP),"GDP"]<-medGDP
+```
+
+```{r}
+population <-Life$Population
+hist(population)
+
+#Histogram is Left side skewed,so we replace missing value of population with Median
+#first calculate median of population removing missing values
+medpopulation <-median(Life$Population,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Population),"Population"]<-medpopulation
+```
+
+```{r}
+thinness..1.19.years<-Life$thinness..1.19.years
+hist(thinness..1.19.years)
+
+#Histogram is Left side skewed,so we replace missing value of thinness..1.19.years with Median
+#first calculate median of thinness..1.19.years removing missing values
+medthinness..1.19.years <-median(Life$thinness..1.19.years,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$thinness..1.19.years),"thinness..1.19.years"]<-medthinness..1.19.years
+```
+
+```{r}
+thinness.5.9.years<-Life$thinness.5.9.years
+hist(thinness.5.9.years)
+
+#Histogram is Left side skewed,so we replace missing value of thinness.5.9.years with Median
+#first calculate median of thinness.5.9.years removing missing values
+medthinness.5.9.years <-median(Life$thinness.5.9.years,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$thinness.5.9.years),"thinness.5.9.years"]<-medthinness.5.9.years
+
+```
+
+```{r}
+Income.composition.of.resources<-Life$Income.composition.of.resources
+hist(Income.composition.of.resources)
+
+#we replace missing value of Income.composition.of.resources with Median
+#first calculate median of Income.composition.of.resources removing missing values
+Income.composition.of.resources <-median(Life$Income.composition.of.resources,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Income.composition.of.resources),"Income.composition.of.resources"]<-Income.composition.of.resources
+
+```
+
+```{r}
+schooling<-Life$Schooling
+hist(schooling)
+
+#we replace missing value of schooling with Median
+#first calculate median of schooling removing missing values
+medschooling <-median(Life$Schooling,na.rm = TRUE)
+
+#********* imputing median value to NA value***********
+
+Life[is.na(Life$Schooling),"Schooling"]<-medschooling
+```
+
+```{r}
+#checking for NA values
+sum(is.na(Life))
+
+summary(Life)
+
+```
+
+```{r}
+# find the duplicate rows
+# remove duplicate rows
+Life_clean <- unique(Life)
+dim(Life)
+dim(Life_clean)
+
+#There is no Duplication of any records 
+```
+
+
+
+6.Detecting Outliers:
+
+1.Is the adult mortality rate one? 
+2.Is it possible that infant mortality rates could be as low as 0 per 1000? That is not possible. However, 1800 is most likely an outlier, though it is possible in a country with extremely high birth rates 
+ 
+3.Is it feasible to have a GDP per capital as low as $1.68 (USD).
+4.For a whole nation, the population is 34?
+
+
+
+
+
+7.Removing Outliers by using winsorizing Technique.
+
+```{r}
+#******finding and removing Outlier from Life expectancy Variable******************
+boxplot(Life$Life.expectancy)
+
+Data1 <-Life
+
+bench<- 63.40 -1.5* IQR(Data1$Life.expectancy)
+bench
+Data1[Data1$Life.expectancy > 44.6, ]
+Data1<- Data1[Data1$Life.expectancy>bench, ]
+summary(Data1$Life.expectancy)
+boxplot(Data1$Life.expectancy)
+#Life expectancy ranges from 44 to 89 years old. This means that people in the highest-life-expectancy countries lived nearly twice as long as those in the lowest-life-expectancy countries.
+```
+
+```{r}
+#Creation of dummy variable
+#A new dummy variable developed is created based on the status of countries that means 1 indicates country is developed and 0 shows country is developing.
+Data1$Developed=ifelse(Data1$Status=="Developed",1,0)
+attach(Data1)
+
+```
+
+2.Adult Mortality
+```{r}
+#Removing outliers by using winsorizing technique.
+summary(Data1$Adult.Mortality)
+data2<-Data1
+IQR_Adultmor<- 226-74     
+adultm<-226+1.5*IQR_Adultmor
+
+a<-data2$Adult.Mortality[data2$Adult.Mortality>adultm]
+print("No of outliers of adult mortality feature is ",)
+length(a)
+data2$Adult.Mortality[data2$Adult.Mortality>adultm]<-adultm
+summary(data2$Adult.Mortality)
+boxplot(Data1$Adult.Mortality,data2$Adult.Mortality,names = c("before Winsorizing","after Winsorizing"),col = c("Red","blue"))
+
+
+
+```
+
+3.Infant deaths
+```{r}
+
+summary(data2$infant.deaths)
+data3<-data2
+IQR_infant<-21-0
+infant<-21+1.5*IQR_infant
+infant
+
+b<-data3$infant.deaths[data3$infant.deaths>infant]
+print("No of outliers of infant deaths is ",)
+length(b)
+data3$infant.deaths[data3$infant.deaths>infant]<-infant
+summary(data3$infant.deaths)
+boxplot(data2$infant.deaths,data3$infant.deaths,names = c("before Winsorizing","after Winsorizing"),col = c("turquoise","tomato"))
+boxplot(data3$infant.deaths)
+
+```
+
+4.Alcohol
+```{r}
+summary(data3$Alcohol)
+data4<-data3
+IQR_alcohole<- 7.420-1.080
+Alcoholee<-7.420+1.5*IQR_alcohole
+Alcoholee
+
+b<-data4$Alcohol[data4$Alcohol>Alcoholee]
+print("No of outliers of Alcohol is ",)
+length(b)
+data4$Alcohol[data4$Alcohol>Alcoholee]<-Alcoholee
+summary(data4$Alcohol)
+boxplot(data3$Alcohol,data4$Alcohol,names = c("before Winsorizing","after Winsorizing"),col = c("turquoise","tomato"))
+
+```
+
+5.Percentage Expenditure
+
+```{r}
+summary(data4$percentage.expenditure)
+data5<-data4
+IQR_expenditure<- 445.442-4.674
+perExpenditure<-445.442+1.5*IQR_expenditure
+perExpenditure
+b <-data5$percentage.expenditure[data5$percentage.expenditure>perExpenditure]
+print("No of outliers of percentage expenditure is ",)
+length(b)
+data5$percentage.expenditure[data5$percentage.expenditure>perExpenditure]<-perExpenditure
+summary(data5$percentage.expenditure)
+boxplot(data4$percentage.expenditure,data5$percentage.expenditure,names = c("before Winsorizing","after Winsorizing"),col = c("turquoise","tomato"))
+
+
+```
+
+6.Hepatitis.B
+
+```{r}
+
+summary(data5$Hepatitis.B)
+boxplot(data5$Hepatitis.B)
+data6<-data5
+IQR_hepatitis<- 96-82
+hepat<- 82-1.5*IQR_hepatitis  #low
+hepat
+b <-data6$Hepatitis.B[data6$Hepatitis.B <hepat]
+print("No of outliers of Hepatitis B is ",)
+length(b)
+data6$Hepatitis.B[data6$Hepatitis.B <hepat]<-hepat
+summary(data6$Hepatitis.B)
+boxplot(data5$Hepatitis.B,data6$Hepatitis.B,names = c("before Winsorizing","after Winsorizing"),col = c("turquoise","tomato"))
+boxplot(data6$Hepatitis.B)
+
+
+
+```
+
+7.Measles
+```{r}
+summary(data6$Measles)
+data7<-data6
+IQR_measles<- 354-0
+measless<-354+1.5*IQR_measles
+measless
+
+
+b<-data7$Measles[data7$Measles>measless]
+print("No of outliers of measles are ",)
+length(b)
+data7$Measles[data7$Measles>measless]<-measless
+summary(data7$Measles)
+boxplot(data6$Measles,data7$Measles,names = c("before Winsorizing","after Winsorizing"),col = c("turquoise","tomato"))
+
+```
+
+```{r}
+
+```
+
+
+8.Under five deaths
+```{r}
+summary(data7$under.five.deaths)
+data8<-data7
+IQR_under5<- 26-0
+under5deaths<- 26+1.5*IQR_under5
+under5deaths
+
+
+b<-data8$under.five.deaths[data8$under.five.deaths>under5deaths]
+print("No of outliers of under five deaths are ",)
+length(b)
+data8$under.five.deaths[data8$under.five.deaths>under5deaths]<-under5deaths
+summary(data8$under.five.deaths)
+boxplot(data7$under.five.deaths,data8$under.five.deaths,names = c("before Winsorizing","after Winsorizing"),col = c("orange","blue"))
+```
+
+9.polio
+```{r}
+summary(data8$Polio)
+data9<-data8
+IQR_polio<-97-78
+polioo<-78-1.5*IQR_polio  #low
+polioo
+
+
+b<-data9$Polio[data9$Polio<polioo]
+print("No of outliers of polio are ",)
+length(b)
+data9$Polio[data9$Polio<polioo]<-polioo
+summary(data9$Polio)
+boxplot(data8$Polio,data9$Polio,names = c("before Winsorizing","after Winsorizing"),col = c("orange","blue"))
+
+
+```
+
+10.Total Expenditure
+```{r}
+summary(data9$Total.expenditure)
+data10<-data9
+IQR_totalEXP<-7.330-4.360
+TotalEXP<- 7.330+1.5*IQR_totalEXP
+TotalEXP
+
+b<-data10$Total.expenditure[data10$Total.expenditure>TotalEXP]
+print("No of outliers of Total expenditure are ",)
+length(b)
+data10$Total.expenditure[data10$Total.expenditure>TotalEXP]<-TotalEXP
+summary(data10$Total.expenditure)
+boxplot(data9$Total.expenditure,data10$Total.expenditure,names = c("before Winsorizing","after Winsorizing"),col = c("purple","pink"))
+```
+
+11. Diphtheria
+
+```{r}
+summary(data10$Diphtheria)
+data11<-data10
+IQR_dipheria<-97-79
+Diphteriaa<-79-1.5*IQR_dipheria          #low
+Diphteriaa
+
+b<-data11$Diphtheria[data11$Diphtheria < Diphteriaa]
+print("No of outliers of Dipheria are ",)
+length(b)
+data11$Diphtheria[data11$Diphtheria<Diphteriaa]<-Diphteriaa
+summary(data11$Diphtheria)
+boxplot(data10$Diphtheria,data11$Diphtheria,names = c("before Winsorizing","after Winsorizing"),col = c("yellow","blue"))
+
+```
+
+12.HIV/AIDS
+```{r}
+summary(data11$HIV.AIDS)
+data12<-data11
+IQR_hiv <- 0.700-0.100
+aids<-  0.700+1.5*IQR_hiv
+aids
+
+
+b<-data12$HIV.AIDS[data12$HIV.AIDS>aids]
+print("No of outliers of HIV/AIDS are ",)
+length(b)
+data12$HIV.AIDS[data12$HIV.AIDS>aids]<-aids
+summary(data12$HIV.AIDS)
+boxplot(data11$HIV.AIDS,data12$HIV.AIDS,names = c("before Winsorizing","after Winsorizing"),col = c("purple","yellow"))
+
+```
+
+13.GDP
+```{r}
+summary(data12$GDP)
+data13<-data12
+IQR_gdp<-4838.24-595.00
+gdp<-  4838.24+1.5*IQR_gdp
+gdp
+
+
+b<-data13$GDP[data13$GDP >gdp ]
+print("No of outliers of gdp are ",)
+length(b)
+data13$GDP[data13$GDP>gdp]<-gdp
+summary(data13$GDP)
+boxplot(data12$GDP,data13$GDP,names = c("before Winsorizing","after Winsorizing"),col = c("orange","red"))
+
+```
+
+14.Population
+
+```{r}
+summary(data12$Population)
+data14<-data13
+IQR_populatio <-4.516e+06-4.128e+05
+populationn<-4.516e+06+06+1.5*IQR_populatio
+populationn
+
+
+b<-data14$Population[data14$Population >populationn]
+print("No of outliers of population are ",)
+length(b)
+data14$Population[data14$Population>populationn]<-populationn
+summary(data14$Population)
+boxplot(data13$Population,data14$Population,names = c("before Winsorizing","after Winsorizing"),col = c("red","blue"))
+```
+
+15.Thinness 10 to19 years
+
+```{r}
+summary(data14$thinness..1.19.years)
+data15<-data14
+IQR_thin1.19<- 7.100-1.600
+thin1.19<- 7.100+1.5*IQR_thin1.19
+thin1.19
+
+
+b<-data15$thinness..1.19.years[data15$thinness..1.19.years >thin1.19]
+print("No of outliers of Thinness 10 to 9years are ",)
+length(b)
+data15$thinness..1.19.years[data15$thinness..1.19.years>thin1.19]<-thin1.19
+summary(data15$thinness..1.19.years)
+boxplot(data14$thinness..1.19.years,data15$thinness..1.19.years,names = c("before Winsorizing","after Winsorizing"),col = c("red","yellow"))
+```
+
+16.Thinness 5 to 9 years
+```{r}
+summary(data15$thinness.5.9.years)
+data16<-data15
+IQR_thinness5.9<-7.100-1.600
+thinness5.9<-  7.100+1.5*IQR_thinness5.9
+thinness5.9
+
+
+b<-data16$thinness.5.9.years[data16$thinness.5.9.years >thinness5.9]
+print("No of outliers of Thinness 5 to 9 years are ",)
+length(b)
+data16$thinness.5.9.years[data16$thinness.5.9.years>thinness5.9]<-thinness5.9
+summary(data16$thinness.5.9.years)
+boxplot(data15$thinness.5.9.years,data16$thinness.5.9.years,names = c("before Winsorizing","after Winsorizing"),col = c("orange","blue"))
+```
+
+17. Income composition Resources
+
+```{r}
+summary(data16$Income.composition.of.resources)
+data17<-data16
+IQR_income<-0.773-0.508
+income<-  0.773+1.5*IQR_income
+income
+
+b<-data17$Income.composition.of.resources[data17$Income.composition.of.resources >income]
+print("No of outliers of Income are ",)
+length(b)
+data17$Income.composition.of.resources[data17$Income.composition.of.resources>income]<-income
+summary(data17$Income.composition.of.resources)
+boxplot(data16$Income.composition.of.resources,data17$Income.composition.of.resources,names = c("before Winsorizing","after Winsorizing"),col = c("maroon","navy"))
+
+#There is no outlier in Income 
+```
+
+18. Schooling
+```{r}
+summary(data17$Schooling)
+data18<-data17
+IQ_scool<-14.10-10.30
+school<-10.30-1.5*IQ_scool                        #low
+school
+
+b<-data18$Schooling[data18$Schooling <school]
+print("No of outliers of schooling are ",)
+length(b)
+data18$Schooling[data18$Schooling<school]<-school
+summary(data18$Schooling)
+boxplot(data17$Schooling,data18$Schooling,names = c("before Winsorizing","after Winsorizing"),col = c("green","blue"))
+```
+
+```{r}
+data19<-data18
+summary(data18$Schooling)
+IQR_schooling<- 14.10-10.30
+schoolingg<- 14.10+1.5*IQR_schooling
+schoolingg
+
+b<-data19$Schooling[data19$Schooling >schoolingg]
+print("No of outliers of schooling are ",)
+length(b)
+data19$Schooling[data19$Schooling>school]<-schoolingg
+summary(data19$Schooling)
+boxplot(data18$Schooling,data19$Schooling,names = c("before Winsorizing","after Winsorizing"),col = c("green","blue"))
+```
+
+```{r}
+NewLife<-data19
+```
+
+```{r}
+boxplot(NewLife$Life.expectancy,NewLife$Adult.Mortality,NewLife$infant.deaths,NewLife$Alcohol,NewLife$percentage.expenditure,NewLife$Hepatitis.B,NewLife$Measles,NewLife$under.five.deaths,NewLife$Polio,NewLife$Total.expenditure,NewLife$Diphtheria,NewLife$HIV.AIDS,NewLife$GDP,NewLife$Population,NewLife$thinness..1.19.years,NewLife$thinness.5.9.years,NewLife$Income.composition.of.resources,NewLife$Schooling,names = c("Life Expectancy","Adult mortality","infantDeaths" ,"Alcohol","percentage expenditure","Hepatits.B","Measles","under five deaths","Polio","TotalExpenditure","Diphtheria","HIV/AIDS","GDP","Population","Thinness 10 to 9 years","Thinness 5 to 9 years","Income composition of resources","Schooling"), col= c("green","yellow","red","maroon","blue","orange","green","tomato","grey","yellow","red","blue","orange","green","tomato","pink","purple","turquoise","thistle"))
+```
+
+*******************Exploratory Data Analysis*************************************
+
+8. Correlation of Variables
+```{r}
+cor(NewLife[4:22])
+```
+
+```{r}
+
+
+plot(NewLife$Status,
+main="Country status",
+xlab="Status",
+ylab="Count of rows",
+border="blue",
+col="green",
+density=50
+)
+```
+
+
+```{r}
+
+trial <- data.frame(st = NewLife$Status)
+
+
+
+PieChart(st, hole = 0, values = "%", data = trial,
+         fill = c("orange", "tomato"), main = "Country Status",lty = 4)
+
+
+
+```
+Observation
+
+Developing countries are more in samples as it 82% and developed is 18%
+
+
+```{r}
+#Categorical Variables
+#Comparison of mean life expectancy rate between developed and developing countries
+#To get an understanding of how the development status of a country is correlated with life expectancy, we compared the mean life expectancy of developed and developing countries.
+
+#Plot showing life expectancy in different country status
+plt <- ggbetweenstats(
+  data = NewLife,
+  x = Status, 
+  y = Life.expectancy
+)
+plt <- plt + 
+  # Add labels and title
+  labs(
+    x = "Development Status",
+    y = "Life Expectancy",
+    title = "Life Expectancy Vs Development Status"
+  ) + 
+  # Customizations
+  theme(
+    # This is the new default font in the plot
+    text = element_text(family = "Roboto", size = 8, color = "black"),
+    plot.title = element_text(
+      family = "Lobster Two", 
+      size = 20,
+      face = "bold",
+      color = "#2a475e"
+    ),
+    
+    plot.title.position = "plot", # slightly different from default
+    axis.text = element_text(size = 10, color = "black"),
+    axis.title = element_text(size = 12)
+  )+
+    theme(
+    axis.ticks = element_blank(),
+    axis.line = element_line(colour = "grey50"),
+    panel.grid = element_line(color = "#b4aea9"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.major.y = element_line(linetype = "dashed"),
+    panel.background = element_rect(fill = "#fbf9f4", color = "#fbf9f4"),
+    plot.background = element_rect(fill = "#fbf9f4", color = "#fbf9f4")
+  )
+plt
+
+```
+As we can see here, there is a clear difference in the life expectancy in developing and developed countries. To begin with, the interquartile range of life expectancy is lower in developed than developing countries.The mean and median are both much higher in developed countries. The minimum life expectancy is also much lower in developing countries. Thus, we can see that the status of the country could affect life expectancy
+
+
+```{r}
+NewLife %>%
+ggplot()+
+        geom_violin(aes(x=Year, y=Life.expectancy, group=Year, fill=Year))
+```
+
+
+```{r}
+# any correlation between vaccinations?
+
+corrplot(cor(NewLife[,c(4,9,10,13,15,16)]),type="upper",method="pie",title=
+           "\n Correlation plot between Life expectancy and Immunization",mar=c(0.1,0.1,0.1,0.1))
+```
+```{r}
+# how about adult mortality and infant mortality?
+
+NewLife %>%
+    group_by(Year) %>% 
+    summarize(adultmort=mean(Adult.Mortality),
+             infantmort=mean(infant.deaths)) %>% 
+    ggplot()+
+  
+        geom_smooth(aes(Year, adultmort), color='orange', se=FALSE)+
+        geom_smooth(aes(Year, infantmort), color='maroon', se=FALSE)
+
+
+```
+
+
+
+```{r}
+# Any relationship between Alcohol and Life expectancy
+plot(y = NewLife$Life.expectancy,
+    x = NewLife$Alcohol,
+    main = "LIFE EXPECTANCY VS ALCOHOL",
+    xlab = "ALCOHOL",
+    ylab = "LIFE EXPECTANCY",
+    pch = 18,
+    col = "darkgreen")
+abline(60,1,
+    col = "blue")
+```
+
+```{r}
+plot(y = NewLife$Life.expectancy,
+    x = NewLife$Income.composition.of.resources,
+    main = "LIFE EXPECTANCY VS Income from resources",
+    xlab = "Income from resources",
+    ylab = "Life Expectancy",
+    pch = 20,
+    col = "Maroon")
+abline(60,1,
+    col = "Darkblue")
+
+
+ggplot(NewLife, aes(x=NewLife$Alcohol, y=NewLife$Life.expectancy))+ 
+  geom_point(aes(color = NewLife$Status)) +
+  geom_smooth(method="lm") + 
+  xlab("Alcohol") + 
+  ylab("Life Expectancy") + 
+  labs(colour="Status") +
+  ggtitle("Life Expectancy with Alcohol")
+
+ggplot(NewLife, aes(x=NewLife$Schooling, y=NewLife$Life.expectancy))+ 
+  geom_point(aes(color = NewLife$Status)) +
+  geom_smooth(method="lm") + 
+  xlab("Schooling") + 
+  ylab("Life Expectancy") + 
+  labs(colour="Status") +
+  ggtitle("Life Expectancy with schooling")
+
+```
+
+```{r}
+#Life expectancy with Immunization
+
+ggplot(NewLife, aes(x=NewLife$Hepatitis.B, y=NewLife$Life.expectancy))+ 
+  geom_point(aes(color = NewLife$Status)) +
+  geom_smooth(method="lm") + 
+  xlab("Hepatitis B") + 
+  ylab("Life Expectancy") + 
+  labs(colour="Status") +
+  ggtitle("Life Expectancy with Hepatits B")
+
+ggplot(NewLife, aes(x=NewLife$Polio, y=NewLife$Life.expectancy))+ 
+  geom_point(aes(color = NewLife$Status)) +
+  geom_smooth(method="lm") + 
+  xlab("Polio") + 
+  ylab("Life Expectancy") + 
+  labs(colour="Status") +
+  ggtitle("Life Expectancy with Polio")
+```
+
+```{r}
+#ife expectancy from Lat 15 years
+ggplot(NewLife, aes(x=NewLife$Year, y=NewLife$Life.expectancy))+ 
+  geom_point(aes(color = NewLife$Status)) +
+  geom_smooth(method="lm") + 
+  xlab("Year") + 
+  ylab("Life Expectancy") + 
+  labs(colour="Status") +
+  ggtitle("Life Expectancy from last 15 years")
+
+```
+
+```{r}
+
+#Correlation check
+ggcorrplot::ggcorrplot(cor(NewLife[,4:22]))
+corrplot(cor(NewLife[,c(4:12)]),type="full",method="circle",title="\n Correlation plot between variables",mar=c(0.1,0.1,0.1,0.1))
+corrplot(cor(NewLife[,c(4,12,13,14,15,16,17,18,19,20,21)]),type="full",method="circle",title="\n Correlation plot between variables",mar=c(0.1,0.1,0.1,0.1))
+
+#Correlation check
+
+corrplot(cor(NewLife[,c(4,7,8,11,13,15,17,21)]),type="full",method="pie",title="\n\n \n Highly correlated Variables",mar=c(0.1,0.1,0.1,0.1))
+```
+Observation:
+The above correlation graph is showing relationship between variables.  following are the observations concluded from above correlation heat map
+
+Life Expectancy (target variable) appears to be relatively highly correlated (negatively or positively) with:
+-Adult Mortality (negative)
+-HIV/AIDS (negative)
+-Income Composition of Resources (positive)
+-Schooling (positive)
+-Life expectancy (target variable) is extremely lowly correlated to population (nearly no correlation at all)
+-Infant deaths and Under Five deaths are extremely highly correlated
+-Percentage Expenditure and GDP are relatively highly correlated
+-Hepatitis B vaccine rate is relatively positively correlated with Polio and Diphtheria vaccine rates
+-Polio vaccine rate and Diphtheria vaccine rate are very positively correlated
+-HIV/AIDS is relatively negatively correlated with Income Composition of Resources
+-Thinness of 5-9 Year olds rate and Thinness of 10-15 Year olds rate is extremely highly correlated
+-Income Composition of Resources and Schooling are very highly correlated
+
+
+Insights from EDA:-
+
+1.Life expectancy has risen over time.
+2.Adult mortality rate, prevalence of thinness in children aged 1 to 19 years, infant mortality, and HIV deaths are all prevalent in developed countries. AIDS is less prevalent in developed countries when compared to developing countries, resulting in a higher life expectancy in developed countries.
+3.Other variables, such as income composition of resources, number of years of schooling, percentage expenditure, and total health expenditure, are higher in developed countries than in developing countries, which raising life expectancy in developed countries.
+4.In addition, increased immunisation coverage against Hepatitis B, Polio, and Diphtheria in developed countries results in higher life expectancy compared to developing countries.
+5.In developed countries, life expectancy is higher than in developing countries.
+
+**************************************************************************
+
+9. Unsupervised Method: Principal component Analysis
+
+```{r}
+####  Principal Component Analysis{#Principal_Component_Analysis}
+
+# perform PCA on the NewLife dataset
+#   note: variables are centered and scaled before analysis
+
+pc_newLife <- prcomp(NewLife[4:22], center = T, scale. = T)
+
+summary(pc_newLife)
+print('-------------------------------------------------------')
+# calculate the proportion of exaplained variance (PEV) from the std values
+pc_NewLife_var <- pc_newLife$sdev^2
+pc_NewLife_var
+A<- '---------------This is a Proportion of Explained variance ---------------'
+print(A)
+pc_NewLife_PEV <- pc_NewLife_var / sum(pc_NewLife_var)
+pc_NewLife_PEV
+```
+
+
+```{r}
+# plot the variance per PC
+
+plot(pc_newLife)
+plot.pc_newLife <- plot(pc_newLife, type="l")
+opar <- par(no.readonly = TRUE)
+plot(
+  cumsum(pc_NewLife_PEV),
+  ylim = c(0,1),
+  xlab = 'PC',
+  ylab = 'cumulative PEV',
+  pch = 20,
+  col = 'orange'
+)
+abline(h = 0.8, col = 'red', lty = 'dashed')
+par(opar)
+
+
+biplot(pc_newLife)
+```
+```{r}
+
+fviz_pca_ind(pc_newLife,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+             )
+```
+
+```{r}
+fviz_pca_var(pc_newLife,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+             )
+```
+
+```{r}
+groups <- as.factor(NewLife$Developed)
+fviz_pca_ind(pc_newLife,
+             col.ind = groups, # color by groups
+             palette = c("#00AFBB",  "#FC4E07"),
+             addEllipses = TRUE, # Concentration ellipses
+             ellipse.type = "confidence",
+             legend.title = "Groups",
+             repel = TRUE
+             )
+```
+
+
+
+
+
+
+
+
+Observation:
+1. Here we get 19 principal components named PC1-19. Each of these explains a percentage of the total variation in the dataset. For example, PC1 to 7 explains nearly 72% of the total variance i.e. around three-fourth of the information of the dataset can be encapsulated by just that one Principal Component. rest of the component explains 20% and so on. 
+
+2.Visulisation:In a screeplot the ‘arm-bend’ represents a decrease in cumulative contribution. The above plot shows the bend at the second principal component.
+
+
+
+```{r}
+#export this dataframe and import in pyspark for further modelling.
+write.csv(NewLife, "DDA Courework.csv")
+```
+  
+-----------------------------------------------------------------------------------
+
+After Detail analysis of  PCA in above step we got the result that first 7 to 8 component explain 80% of Data so here in following steps original dataset New Life store into PClife3 object and implement Random forest Regressor with principal component.
+
+10.Random Forest implementation
+
+```{r}
+
+
+PClife3<-NewLife[4:23] #original dataset stored in PClife 3
+
+set.seed(123)
+split=sample.split(PClife3$Life.expectancy,SplitRatio=0.8)# splitting dataset 8:2
+training_set=subset(PClife3,split== TRUE)
+test_set=subset(PClife3,split==FALSE)
+training_set[2:20]=scale(training_set[2:20])#scaling dataset except life expectancy column
+test_set[2:20]=scale(test_set[2:20])
+#principal component analysis
+#as we know 7 to 8 component represent most data so in following step we choose 8 component i.e 7 pc component and 1 target variable
+pca= preProcess(x=training_set[2:20], method= 'pca' , pcaComp=8)
+
+training_set= predict(pca,training_set)
+training_set= training_set[c(2,3,4,5,6,7,8,1)]#arrangement of column
+test_set= predict(pca,test_set)
+test_set= test_set[c(2,3,4,5,6,7,8,1)]
+
+#Random Forest implementation
+rf.fit <- randomForest(formula = training_set$Life.expectancy~.,data = training_set, ntree=1000,
+                       keep.forest=FALSE, importance=TRUE)
+print(rf.fit)
+plot(rf.fit)
+importance(rf.fit)
+varImpPlot(rf.fit)
+```
+```{r}
+#Conclusion
+#We saw how developing countries have very low life expectancy when we see diseases like HIV/AIDS, polio, and so on, and how education plays a big role in increasing life expectancy in developing countries as people become much more educated and help improve the country's welfare and healthcare, as well as the economy.
+#Despite the fact that it was collected by WHO, the dataset contained a large number of missing values.
+#Winsorization was used to deal with a large number of outliers that were discovered.
+
+```
+
+
+
+#Reference:
+(https://www.kaggle.com/code/blaiseappolinary/life-expectancy-analysis)
+
+
